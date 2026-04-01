@@ -1,8 +1,14 @@
-from rest_framework import serializers
-from .models import Example
+# converts between django models and json
 
-class ExampleSerializer(serializers.ModelSerializer):
+from rest_framework import serializers
+from .models import User, Post
+
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Example
-        fields = ['id', 'title', 'description', 'created_at', 'updated_at']
-        read_only_fields = ['created_at', 'updated_at']
+        model = User
+        fields = ['user_id', 'username', 'password', 'about']
+
+class PostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = ['post_id', 'date_created', 'user_owner', 'post_title', 'post_text']

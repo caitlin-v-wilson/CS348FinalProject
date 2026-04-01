@@ -1,8 +1,14 @@
 from django.contrib import admin
-from .models import Example
+from .models import User, Post
 
-@admin.register(Example)
-class ExampleAdmin(admin.ModelAdmin):
-    list_display = ('title', 'created_at', 'updated_at')
-    list_filter = ('created_at',)
-    search_fields = ('title', 'description')
+@admin.register(User)
+class UserAdmin(admin.ModelAdmin):
+    list_display = ('user_id', 'username', 'about')
+    search_fields = ('username',)
+
+
+@admin.register(Post)
+class PostAdmin(admin.ModelAdmin):
+    list_display = ('post_id', 'post_title', 'user_owner', 'date_created')
+    search_fields = ('post_title',)
+    list_filter = ('date_created',)
