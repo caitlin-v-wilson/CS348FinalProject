@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 
-function Profile({ userId, onLogout, onViewFeed }) {
+function Profile({ userId, onLogout, onViewFeed, onViewHistory }) {
   const [user, setUser] = useState(null)
   const [userPosts, setUserPosts] = useState([])
   const [isEditing, setIsEditing] = useState(false)
@@ -9,6 +9,9 @@ function Profile({ userId, onLogout, onViewFeed }) {
   const [showNewPostModal, setShowNewPostModal] = useState(false)
   const [newPostTitle, setNewPostTitle] = useState('')
   const [newPostText, setNewPostText] = useState('')
+  const [editingPostId, setEditingPostId] = useState(null)
+  const [editPostTitle, setEditPostTitle] = useState('')
+  const [editPostText, setEditPostText] = useState('')
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -101,6 +104,45 @@ function Profile({ userId, onLogout, onViewFeed }) {
     }
   }
 
+  const handleStartEditPost = (post) => {
+    setEditingPostId(post.post_id)
+    setEditPostTitle(post.post_title)
+    setEditPostText(post.post_text)
+  }
+
+  const handleSaveEditPost = async () => {
+    if (!editPostTitle.trim() || !editPostText.trim()) {
+      alert('Please fill in all fields')
+      return
+    }
+
+    try {
+      await axios.patch(`http://localhost:8000/api/auth/posts/${editingPostId}/`, {
+        post_title: editPostTitle,
+        post_text: editPostText
+      })
+      alert('Post updated successfully')
+      setEditingPostId(null)
+      
+      // Refresh user posts
+      const response = await axios.get(`http://localhost:8000/api/auth/posts/?user_owner=${userId}`)
+      const posts = response.data.results || response.data
+      const sortedPosts = posts.sort((a, b) => {
+        return new Date(b.date_created) - new Date(a.date_created)
+      })
+      setUserPosts(sortedPosts)
+    } catch (error) {
+      console.error('Error updating post:', error)
+      alert('Failed to update post')
+    }
+  }
+
+  const handleCancelEditPost = () => {
+    setEditingPostId(null)
+    setEditPostTitle('')
+    setEditPostText('')
+  }
+
   const handleCreatePost = async () => {
     if (!newPostTitle.trim() || !newPostText.trim()) {
       alert('Please fill in all fields')
@@ -177,13 +219,36 @@ function Profile({ userId, onLogout, onViewFeed }) {
           <div>
             {userPosts.map((post) => (
               <div key={post.post_id} style={{ border: '1px solid gray', padding: '10px', marginBottom: '10px' }}>
-                <h4>{post.post_title}</h4>
-                <p>{post.post_text}</p>
-                <p style={{ fontSize: '12px', color: 'gray' }}>
-                  {new Date(post.date_created).toLocaleString()}
-                </p>
-                {isEditing && (
-                  <button onClick={() => handleDeletePost(post.post_id)} style={{ color: 'red' }}>Delete</button>
+                {editingPostId === post.post_id ? (
+                  <div>
+                    <input
+                      type="text"
+                      value={editPostTitle}
+                      onChange={(e) => setEditPostTitle(e.target.value)}
+                      style={{ width: '100%', padding: '8px', marginBottom: '10px', boxSizing: 'border-box' }}
+                    />
+                    <textarea
+                      value={editPostText}
+                      onChange={(e) => setEditPostText(e.target.value)}
+                      style={{ width: '100%', height: '100px', padding: '8px', marginBottom: '10px', boxSizing: 'border-box' }}
+                    />
+                    <button onClick={handleSaveEditPost}>Save</button>
+                    <button onClick={handleCancelEditPost}>Cancel</button>
+                  </div>
+                ) : (
+                  <div>
+                    <h4>{post.post_title}</h4>
+                    <p>{post.post_text}</p>
+                    <p style={{ fontSize: '12px', color: 'gray' }}>
+                      {new Date(post.date_created).toLocaleString()}
+                    </p>
+                    {isEditing && (
+                      <div>
+                        <button onClick={() => handleStartEditPost(post)}>Edit</button>
+                        <button onClick={() => handleDeletePost(post.post_id)} style={{ color: 'red' }}>Delete</button>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             ))}
@@ -192,6 +257,7 @@ function Profile({ userId, onLogout, onViewFeed }) {
         
         <button onClick={() => setShowNewPostModal(true)}>New Post</button>
         <button onClick={onViewFeed}>View Feed</button>
+        <button onClick={onViewHistory}>View History</button>
         <button onClick={onLogout}>Logout</button>
         <button onClick={handleDeleteAccount}>Delete Account</button>
 

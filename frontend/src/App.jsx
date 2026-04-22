@@ -2,6 +2,7 @@ import { useState } from 'react'
 import axios from 'axios'
 import Profile from './Profile'
 import Feed from './Feed'
+import History from './History'
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -64,11 +65,18 @@ function App() {
     setCurrentPage('profile')
   }
 
+  const handleViewHistory = () => {
+    setCurrentPage('history')
+  }
+
   if (isLoggedIn) {
     if (currentPage === 'feed') {
       return <Feed onBackToProfile={handleBackToProfile} />
     }
-    return <Profile userId={currentUser} onLogout={handleLogout} onViewFeed={handleViewFeed} />
+    if (currentPage === 'history') {
+      return <History onBackToProfile={handleBackToProfile} />
+    }
+    return <Profile userId={currentUser} onLogout={handleLogout} onViewFeed={handleViewFeed} onViewHistory={handleViewHistory} />
   }
 
   return (
