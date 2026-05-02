@@ -4,6 +4,7 @@ A full-stack web application with a React frontend and Django REST Framework bac
 
 ## Project Structure
 
+Deployed Link: https://celebrated-kindness-production-64fc.up.railway.app/
 ```
 CS348Project/
 ├── frontend/              # React + Vite application
