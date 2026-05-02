@@ -65,17 +65,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# Database
-# Railway MySQL plugin sets MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, MYSQL_PORT
-# For local dev, fall back to DB_* variables
+# Database - uses Railway env vars (MYSQLHOST etc.) or falls back to local defaults
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': config('MYSQL_DATABASE', default=config('DB_NAME', default='cs348project')),
-        'USER': config('MYSQL_USER', default=config('DB_USER', default='root')),
-        'PASSWORD': config('MYSQL_PASSWORD', default=config('DB_PASSWORD', default='password123')),
-        'HOST': config('MYSQL_HOST', default=config('DB_HOST', default='127.0.0.1')),
-        'PORT': config('MYSQL_PORT', default=config('DB_PORT', default='3306')),
+        'NAME': os.environ.get('MYSQLDATABASE', 'cs348project'),
+        'USER': os.environ.get('MYSQLUSER', 'root'),
+        'PASSWORD': os.environ.get('MYSQLPASSWORD', 'password123'),
+        'HOST': os.environ.get('MYSQLHOST', '127.0.0.1'),
+        'PORT': os.environ.get('MYSQLPORT', '3306'),
         'OPTIONS': {
             'isolation_level': 'read committed',
         },
