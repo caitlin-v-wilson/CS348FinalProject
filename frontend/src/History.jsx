@@ -15,7 +15,7 @@ function History({ onBackToProfile }) {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/auth/users/')
+      const response = await axios.get('/api/auth/users/')
       const allUsers = response.data.results || response.data
       setUsers(allUsers)
     } catch (error) {
@@ -31,7 +31,7 @@ function History({ onBackToProfile }) {
 
     setLoading(true)
     try {
-      let url = `http://localhost:8000/api/auth/statistics/?start_date=${startDate}&end_date=${endDate}`
+      let url = `/api/auth/statistics/?start_date=${startDate}&end_date=${endDate}`
       if (selectedUser) {
         url += `&user_owner=${selectedUser}`
       }

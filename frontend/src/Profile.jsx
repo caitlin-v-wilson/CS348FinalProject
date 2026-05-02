@@ -16,7 +16,7 @@ function Profile({ userId, onLogout, onViewFeed, onViewHistory }) {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get(`http://localhost:8000/api/auth/users/${userId}/`)
+        const response = await axios.get(`/api/auth/users/${userId}/`)
         setUser(response.data)
         setAboutText(response.data.about || '')
       } catch (error) {
@@ -26,7 +26,7 @@ function Profile({ userId, onLogout, onViewFeed, onViewHistory }) {
 
     const fetchUserPosts = async () => {
       try {
-        const response = await axios.get(`http://localhost:8000/api/auth/posts/?user_owner=${userId}`)
+        const response = await axios.get(`/api/auth/posts/?user_owner=${userId}`)
         const posts = response.data.results || response.data
         // Sort by date_created descending
         const sortedPosts = posts.sort((a, b) => {
@@ -49,7 +49,7 @@ function Profile({ userId, onLogout, onViewFeed, onViewHistory }) {
     }
 
     try {
-      await axios.patch(`http://localhost:8000/api/auth/users/${userId}/`, {
+      await axios.patch(`/api/auth/users/${userId}/`, {
         about: aboutText
       })
       setUser({ ...user, about: aboutText })
@@ -72,7 +72,7 @@ function Profile({ userId, onLogout, onViewFeed, onViewHistory }) {
     
     if (confirmed) {
       try {
-        await axios.delete(`http://localhost:8000/api/auth/users/${userId}/`)
+        await axios.delete(`/api/auth/users/${userId}/`)
         alert('Account deleted successfully')
         onLogout()
       } catch (error) {
@@ -87,11 +87,11 @@ function Profile({ userId, onLogout, onViewFeed, onViewHistory }) {
     
     if (confirmed) {
       try {
-        await axios.delete(`http://localhost:8000/api/auth/posts/${postId}/`)
+        await axios.delete(`/api/auth/posts/${postId}/`)
         alert('Post deleted successfully')
         
         // Refresh user posts
-        const response = await axios.get(`http://localhost:8000/api/auth/posts/?user_owner=${userId}`)
+        const response = await axios.get(`/api/auth/posts/?user_owner=${userId}`)
         const posts = response.data.results || response.data
         const sortedPosts = posts.sort((a, b) => {
           return new Date(b.date_created) - new Date(a.date_created)
@@ -117,7 +117,7 @@ function Profile({ userId, onLogout, onViewFeed, onViewHistory }) {
     }
 
     try {
-      await axios.patch(`http://localhost:8000/api/auth/posts/${editingPostId}/`, {
+      await axios.patch(`/api/auth/posts/${editingPostId}/`, {
         post_title: editPostTitle,
         post_text: editPostText
       })
@@ -125,7 +125,7 @@ function Profile({ userId, onLogout, onViewFeed, onViewHistory }) {
       setEditingPostId(null)
       
       // Refresh user posts
-      const response = await axios.get(`http://localhost:8000/api/auth/posts/?user_owner=${userId}`)
+      const response = await axios.get(`/api/auth/posts/?user_owner=${userId}`)
       const posts = response.data.results || response.data
       const sortedPosts = posts.sort((a, b) => {
         return new Date(b.date_created) - new Date(a.date_created)
@@ -150,7 +150,7 @@ function Profile({ userId, onLogout, onViewFeed, onViewHistory }) {
     }
 
     try {
-      await axios.post('http://localhost:8000/api/auth/posts/', {
+      await axios.post('/api/auth/posts/', {
         post_title: newPostTitle,
         post_text: newPostText,
         user_owner: userId,
@@ -162,7 +162,7 @@ function Profile({ userId, onLogout, onViewFeed, onViewHistory }) {
       setShowNewPostModal(false)
       
       // Refresh user posts
-      const response = await axios.get(`http://localhost:8000/api/auth/posts/?user_owner=${userId}`)
+      const response = await axios.get(`/api/auth/posts/?user_owner=${userId}`)
       const posts = response.data.results || response.data
       const sortedPosts = posts.sort((a, b) => {
         return new Date(b.date_created) - new Date(a.date_created)

@@ -1,7 +1,4 @@
-# AI Usage
-
-
-## Tasks AI Assisted With
+# AI Usage Statement
 
 ### 1. Understanding Django's SQL Injection Protections
 

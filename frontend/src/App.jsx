@@ -15,7 +15,7 @@ function App() {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('http://localhost:8000/api/auth/login/', {
+      const response = await axios.post('/api/auth/login/', {
         username: loginUsername,
         password: loginPassword
       })
@@ -33,7 +33,7 @@ function App() {
 
   const handleSignup = async () => {
     try {
-      const response = await axios.post('http://localhost:8000/api/auth/users/', {
+      const response = await axios.post('/api/auth/users/', {
         username: signupUsername,
         password: signupPassword,
         about: ''

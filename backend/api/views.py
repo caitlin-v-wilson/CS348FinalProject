@@ -11,7 +11,7 @@ def sanitize(value: str) -> str:
     result = ''
     inside_tag = False
     for char in value:
-        if char == '<':
+        if char == '<': 
             inside_tag = True
         elif char == '>':
             inside_tag = False
@@ -57,8 +57,10 @@ class UserViewSet(viewsets.ModelViewSet):
         if 'about' in data:
             data['about'] = sanitize(data['about'])
         kwargs['partial'] = kwargs.get('partial', False)
-        instance = self.get_object()  # permission checks
-        instance = User.objects.select_for_update().get(pk=instance.pk)  # acquire write lock
+        #see if we can edit it
+        instance = self.get_object() 
+        #get lock to edit it
+        instance = User.objects.select_for_update().get(pk=instance.pk) 
         serializer = self.get_serializer(instance, data=data, partial=kwargs['partial'])
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
@@ -94,8 +96,11 @@ class PostViewSet(viewsets.ModelViewSet):
         if 'post_text' in data:
             data['post_text'] = sanitize(data['post_text'])
         kwargs['partial'] = kwargs.get('partial', False)
-        instance = self.get_object()  # permission checks
-        instance = Post.objects.select_for_update().get(pk=instance.pk)  # acquire write lock
+
+        #get permission to edit post
+        instance = self.get_object()  
+        #edit post
+        instance = Post.objects.select_for_update().get(pk=instance.pk) 
         serializer = self.get_serializer(instance, data=data, partial=kwargs['partial'])
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)

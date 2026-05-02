@@ -11,7 +11,7 @@ function Feed({ onBackToProfile }) {
 
   const fetchPosts = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/auth/posts/')
+      const response = await axios.get('/api/auth/posts/')
       const allPosts = response.data.results || response.data
       
       // Sort by date_created descending (most recent first)
