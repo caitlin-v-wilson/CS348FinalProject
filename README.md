@@ -195,14 +195,3 @@ A sample API model is provided to demonstrate CRUD operations.
 
 ### Database Issues
 - Delete `db.sqlite3` and run migrations again
-
-## Contributing
-
-1. Create a feature branch
-2. Make your changes
-3. Test thoroughly
-4. Submit a pull request
-
-## License
-
-This project is part of CS348 course.

@@ -72,6 +72,9 @@ DATABASES = {
         'PASSWORD': 'password123',
         'HOST': '127.0.0.1',
         'PORT': '3306',
+        'OPTIONS': {
+            'isolation_level': 'read committed',
+        },
     }
 }
 

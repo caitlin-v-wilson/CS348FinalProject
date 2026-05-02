@@ -2,8 +2,22 @@ from rest_framework import viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from django.db import transaction
 from .models import User, Post
 from .serializers import UserSerializer, PostSerializer
+
+def sanitize(value: str) -> str:
+    value = value.strip()
+    result = ''
+    inside_tag = False
+    for char in value:
+        if char == '<':
+            inside_tag = True
+        elif char == '>':
+            inside_tag = False
+        elif not inside_tag:
+            result += char
+    return result
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -12,18 +26,43 @@ class UserViewSet(viewsets.ModelViewSet):
     #crud is default behavior in django, but the 
     #create fuction is for the special behavior 
     #for checking duplicate usernames
+    @transaction.atomic
     def create(self, request, *args, **kwargs):
-        username = request.data.get('username')
         
-        # Check if username already exists
-        if User.objects.filter(username=username).exists():
+        #get a copy of the request data so the input can be santizied
+        data = request.data.copy()
+
+        #santize the data the user inputted for username, password, about
+        data['username'] = sanitize(data.get('username', ''))
+        data['password'] = sanitize(data.get('password', ''))
+        data['about'] = sanitize(data.get('about', ''))
+
+        # Check if the santitized username already exists
+        if User.objects.filter(username=data['username']).exists():
             return Response(
                 {'error': 'This username already exists'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # If username doesn't exist, create the user
-        return super().create(request, *args, **kwargs)
+        #passes the santizied data to the serializer to create the user
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @transaction.atomic
+    def update(self, request, *args, **kwargs):
+        data = request.data.copy()
+        #If the user edited their about section, sanitize it
+        if 'about' in data:
+            data['about'] = sanitize(data['about'])
+        kwargs['partial'] = kwargs.get('partial', False)
+        instance = self.get_object()  # permission checks
+        instance = User.objects.select_for_update().get(pk=instance.pk)  # acquire write lock
+        serializer = self.get_serializer(instance, data=data, partial=kwargs['partial'])
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
@@ -37,14 +76,39 @@ class PostViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(user_owner=user_owner)
         return queryset
 
+    @transaction.atomic
+    def create(self, request, *args, **kwargs):
+        data = request.data.copy()
+        data['post_title'] = sanitize(data.get('post_title', ''))
+        data['post_text'] = sanitize(data.get('post_text', ''))
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @transaction.atomic
+    def update(self, request, *args, **kwargs):
+        data = request.data.copy()
+        if 'post_title' in data:
+            data['post_title'] = sanitize(data['post_title'])
+        if 'post_text' in data:
+            data['post_text'] = sanitize(data['post_text'])
+        kwargs['partial'] = kwargs.get('partial', False)
+        instance = self.get_object()  # permission checks
+        instance = Post.objects.select_for_update().get(pk=instance.pk)  # acquire write lock
+        serializer = self.get_serializer(instance, data=data, partial=kwargs['partial'])
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
 @api_view(['GET'])
 def health_check(request):
     return Response({'status': 'API is running'})
 
 @api_view(['POST'])
 def login(request):
-    username = request.data.get('username')
-    password = request.data.get('password')
+    username = sanitize(request.data.get('username', ''))
+    password = sanitize(request.data.get('password', ''))
     
     try:
         user = User.objects.get(username=username)
