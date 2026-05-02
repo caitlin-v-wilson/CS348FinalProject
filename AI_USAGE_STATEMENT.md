@@ -25,6 +25,10 @@ When running `python manage.py migrate` after adding indexes, the migration fail
 
 I used AI to help generate basic frontend components such as the text box on the login/signup screen and formatting the posts when they appear on the user feed. I reviewed the code it generated and verified correctness 
 
+### 6. Cloud Deployment
+
+I used AI to help me troubleshoot during cloud deployment. When reading error logs from railroad, I used AI assistance to help me understand the error messages and navigate the railroad dashboard. I reviewed its output and verified that I understood why my code was not deploying, and why each fix to each error worked. 
+
 ## Notes on Responsible Use
 
 All AI-generated explanations were verified against official Djang and MySQL documentation, alongside course material. No AI output or explanations were accepted without review. 
